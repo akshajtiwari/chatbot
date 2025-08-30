@@ -1,6 +1,3 @@
-Ahhh got it bro 😅 — you don’t want a **long flashy product pitch README**, you want a **clean GitHub README** that’s practical for devs who’ll actually work on the repo.
-
-Let’s strip it down to the **essentials only**:
 
 ---
 
