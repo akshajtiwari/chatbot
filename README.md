@@ -1,6 +1,3 @@
-Ahhh got it bro 😅 — you don’t want a **long flashy product pitch README**, you want a **clean GitHub README** that’s practical for devs who’ll actually work on the repo.
-
-Let’s strip it down to the **essentials only**:
 
 ---
 
@@ -88,12 +85,3 @@ docker-compose up --build
 
 ---
 
-## 📜 License
-
-MIT License
-
----
-
-👉 This is short, clean, and straight to the point — just enough to get developers started.
-
-Do you want me to also add a **simple architecture diagram (frontend ↔ backend ↔ DB)** in the README, or keep it pure text?
