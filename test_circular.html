@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Circulars & Notices - PSIT</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-gray-50">
+
+    <!-- Header -->
+    <header class="bg-white shadow-md">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <div>
+                <a href="index.html" class="text-2xl font-bold text-gray-800">PSIT Institute of Technology</a>
+            </div>
+            <div>
+                 <a href="index.html" class="text-gray-600 hover:text-blue-600"> &larr; Back to Home</a>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-6 py-12">
+        <h1 class="text-3xl font-bold text-gray-800 mb-6">Circulars & Notices</h1>
+        
+        <div class="bg-white p-8 rounded-lg shadow-lg">
+            <p class="text-gray-600 mb-6">This is the target page for your scraper. Your script should find and process all the document links below.</p>
+
+            <!-- THIS IS THE LIST YOUR SCRAPER NEEDS TO PARSE -->
+            <ul class="space-y-4">
+                <li class="border-b pb-2">
+                    <a href="documents/exam_schedule_fall_2025.pdf" class="text-blue-600 hover:underline">
+                        B.Tech Odd Semester Examination Schedule 2025
+                    </a>
+                    <span class="text-sm text-gray-500 ml-4">(Relative Link)</span>
+                </li>
+                <li class="border-b pb-2">
+                    <a href="documents/holiday_notice_sept_2025.pdf" class="text-blue-600 hover:underline">
+                        Holiday Notice for September 2025
+                    </a>
+                </li>
+                <li class="border-b pb-2">
+                    <a href="Unit 1-ODE.pdf" class="text-blue-600 hover:underline">
+                        Unit 1 Odinary Differential Equations PDF, click to access
+                    </a>
+                    <span class="text-sm text-gray-500 ml-4">(Absolute/External Link)</span>
+                </li>
+                 <li class="border-b pb-2">
+                    <a href="documents/hostel_rules.docx" class="text-blue-600 hover:underline">
+                        Updated Hostel Rulebook 2025-26
+                    </a>
+                     <span class="text-sm text-gray-500 ml-4">(DOCX File - to test filtering)</span>
+                </li>
+                <li class="border-b pb-2">
+                    <a href="https://www.psit.ac.in/" class="text-green-600 hover:underline">
+                        This is a link to an external website, not a document.
+                    </a>
+                </li>
+                <!-- NEWLY ADDED LINK -->
+                <li class="border-b pb-2">
+                    <a href="2085990a0fdjf0.pdf" class="text-blue-600 hover:underline">
+                        Merit List for 23rd Convocation Ceremony 2025
+                    </a>
+                    <span class="text-sm text-gray-500 ml-4">(Uploaded PDF)</span>
+                </li>
+            </ul>
+        </div>
+    </main>
+    
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white mt-12">
+        <div class="container mx-auto px-6 py-4 text-center">
+            <p>&copy; 2025 PSIT Test Institute. All Rights Reserved.</p>
+        </div>
+    </footer>
+
+</body>
+</html>
+
