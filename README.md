@@ -1,96 +1,128 @@
 
+
+# 🌟 Campus Smart Assistant
+
+![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=flat\&logo=html5\&logoColor=white)
+![CSS3](https://img.shields.io/badge/CSS3-1572B6?style=flat\&logo=css3\&logoColor=white)
+![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=flat\&logo=javascript\&logoColor=black)
+
+## 📌 Overview
+
+**Campus Smart Assistant** is an **intelligent web-based platform** designed to enhance communication and accessibility within educational institutions.
+It combines a **modern landing page** with an **interactive, multilingual, and voice-enabled chatbot** to provide **instant information and seamless support** to students, faculty, and staff.
+
+Developed as part of the **Smart India Hackathon (SIH)**, the project focuses on improving **campus engagement**, **accessibility**, and **user experience** through a **clean, responsive, and interactive** interface.
+
 ---
 
-# 🎓 Campus Chatbot
+## ✨ Key Features
 
-A multilingual campus chatbot that ingests notices, parses them into structured text, processes them with NLP, and answers student queries across Web, Mobile, and WhatsApp.
+### 🎨 **Homepage Features**
+
+*  **Dual-Theme System** – Light & Dark mode with preferences stored in `localStorage`.
+*  **Dynamic Particle Background** – Animated, responsive background optimized for all devices.
+*  **Glassmorphism UI** – Sleek, futuristic design with semi-transparent, blurred elements.
+*  **Mobile-First Design** – Fully responsive layout for desktops, tablets, and mobiles.
+
+### 🤖 **Chatbot Widget Features**
+
+*  **Multi-Language Support** – Seamlessly switch between **English, Hindi, Bengali, Telugu, Tamil and many other Regional Language**.
+*  **Voice Input Integration** – Real-time speech-to-text conversion with smooth audio visualization.
+*  **Smart Interaction Flow** – Typing indicators, contextual suggestions, and quick reply buttons.
+*  **Adaptive Input Button** – Dynamically switches between **send** and **microphone** modes.
 
 ---
 
-## 📂 Repository Structure
+## 🚀 Getting Started
 
+Follow these steps to set up and run the project locally:
+
+```bash
+# Clone the repository
+git clone https://github.com/your-username/campus-smart-assistant.git
+
+# Navigate into the project directory
+cd campus-smart-assistant
 ```
-campus-chatbot/
+
+### Run Locally
+
+* Open **`homepage.html`** → Explore the **landing page**.
+* Open **`chatbot.html`** → Interact with the **chatbot widget**.
+
+> 💡 **Tip:** For best performance, use a **modern browser** like Chrome or Edge.
+
+---
+
+## 📂 Project Structure
+
+```bash
+campus-smart-assistant/
+├── homepage.html       # Landing page structure
+├── homepage.css        # Landing page styling & animations
+├── homepage.js         # Homepage dynamic features
 │
-├── ingestion/        # Data ingestion scripts
-├── parsing/          # Parsing & extraction (PDF, DOCX, HTML, OCR)
-├── nlp/              # Multilingual NLP and entity extraction
-├── backend/          # API layer and retrieval system
-├── frontend/         # Web, Mobile, WhatsApp UI
-├── devops/           # Docker, CI/CD, monitoring
-├── tests/            # Unit + integration tests
-└── docs/             # Documentation and API contracts
+├── chatbot.html        # Chatbot widget UI
+├── chatbot.css         # Chatbot styles & effects
+├── chatbot.js          # Chatbot logic & voice integration
+│
+└── assets/             # Images, icons, and media files
 ```
 
 ---
 
-## ⚙️ Setup
+## 🛠️ Tech Stack
 
-### Clone the repo
-
-```bash
-git clone https://github.com/your-org/campus-chatbot.git
-cd campus-chatbot
-```
-
-### Install dependencies
-
-```bash
-pip install -r requirements.txt
-```
-
-### Run backend locally
-
-```bash
-cd backend
-uvicorn main:app --reload
-```
-
-### Run full system with Docker Compose
-
-```bash
-docker-compose up --build
-```
+| **Technology**       | **Purpose**                                                |
+| -------------------- | ---------------------------------------------------------- |
+| **HTML5**            | Structure and semantic markup                              |
+| **CSS3**             | Styling, responsiveness, and animations                    |
+| **JavaScript (ES6)** | Core interactivity and chatbot logic                       |
+| **Web APIs**         | Voice recognition, speech synthesis, and scroll animations |
 
 ---
 
-## 🧑‍💻 Team Roles
+## 🏆 SIH Relevance
 
-* **Ingestion** → Fetch raw data from portals/notice boards
-* **Parsing** → Clean and structure files (PDF, DOCX, HTML, OCR)
-* **NLP** → Entity extraction, multilingual handling
-* **Backend** → APIs + retrieval system
-* **Frontend** → Chatbot UI (web, mobile, WhatsApp)
-* **DevOps** → Deployment, monitoring, testing
+The **Campus Smart Assistant** aligns with **Smart India Hackathon** goals by:
 
----
-
-## 🔄 Workflow
-
-1. Ingestion fetches raw files.
-2. Parsing converts them into clean JSON.
-3. NLP extracts facts and translates.
-4. Backend retrieves info (SQL + vector search).
-5. Frontend shows answers with source + timestamp.
+* Bridging **communication gaps** within campuses.
+* Providing **instant multilingual support** via a chatbot.
+* Offering a **voice-enabled, inclusive** platform.
+* Improving **student-faculty engagement** and **query resolution efficiency**.
 
 ---
 
 ## 🤝 Contributing
 
-1. Fork the repo
-2. Create a feature branch (`git checkout -b feature/my-feature`)
-3. Commit changes (`git commit -m "Added feature"`)
-4. Push branch (`git push origin feature/my-feature`)
-5. Open a Pull Request
+We welcome contributions from the developer community!
 
+1. **Fork** the repository
+2. **Create** a feature branch:
+
+   ```bash
+   git checkout -b feature/new-feature
+   ```
+3. **Commit** your changes:
+
+   ```bash
+   git commit -m "Add new feature"
+   ```
+4. **Push** to your branch:
+
+   ```bash
+   git push origin feature/new-feature
+   ```
+5. **Open a Pull Request** 🎉
+   
 ---
 
 ## 📜 License
 
-MIT License
+This project is licensed under the **MIT License** – free to use, modify, and distribute.
 
 ---
 
-👉 This is short, clean, and straight to the point — just enough to get developers started.
 
-Do you want me to also add a **simple architecture diagram (frontend ↔ backend ↔ DB)** in the README, or keep it pure text?
+*"An intelligent campus assistant for seamless communication and instant support"*
+to make it sound more SIH-ready? It can give your README a strong first impression. Should I?
