@@ -77,19 +77,7 @@ campus-smart-assistant/
 | -------------------- | ---------------------------------------------------------- |
 | **HTML5**            | Structure and semantic markup                              |
 | **CSS3**             | Styling, responsiveness, and animations                    |
-| **JavaScript (ES6)** | Core interactivity and chatbot logic                       |
-| **Web APIs**         | Voice recognition, speech synthesis, and scroll animations |
-
----
-
-## 🏆 SIH Relevance
-
-The **Campus Smart Assistant** aligns with **Smart India Hackathon** goals by:
-
-* Bridging **communication gaps** within campuses.
-* Providing **instant multilingual support** via a chatbot.
-* Offering a **voice-enabled, inclusive** platform.
-* Improving **student-faculty engagement** and **query resolution efficiency**.
+| **JavaScript (ES6)** | Core interactivity and chatbot logic            
 
 ---
 
