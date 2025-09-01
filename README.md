@@ -2,76 +2,24 @@
 
 # 🌟 Campus Smart Assistant
 
-![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=flat\&logo=html5\&logoColor=white)
-![CSS3](https://img.shields.io/badge/CSS3-1572B6?style=flat\&logo=css3\&logoColor=white)
-![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=flat\&logo=javascript\&logoColor=black)
-
-## 📌 Overview
-
-**Campus Smart Assistant** is an **intelligent web-based platform** designed to enhance communication and accessibility within educational institutions.
-It combines a **modern landing page** with an **interactive, multilingual, and voice-enabled chatbot** to provide **instant information and seamless support** to students, faculty, and staff.
-
-Developed as part of the **Smart India Hackathon (SIH)**, the project focuses on improving **campus engagement**, **accessibility**, and **user experience** through a **clean, responsive, and interactive** interface.
-
----
-
-## ✨ Key Features
-
-### 🎨 **Homepage Features**
-
-*  **Dual-Theme System** – Light & Dark mode with preferences stored in `localStorage`.
-*  **Dynamic Particle Background** – Animated, responsive background optimized for all devices.
-*  **Glassmorphism UI** – Sleek, futuristic design with semi-transparent, blurred elements.
-*  **Mobile-First Design** – Fully responsive layout for desktops, tablets, and mobiles.
-
-### 🤖 **Chatbot Widget Features**
-
-*  **Multi-Language Support** – Seamlessly switch between **English, Hindi, Bengali, Telugu, Tamil and many other Regional Language**.
-*  **Voice Input Integration** – Real-time speech-to-text conversion with smooth audio visualization.
-*  **Smart Interaction Flow** – Typing indicators, contextual suggestions, and quick reply buttons.
-*  **Adaptive Input Button** – Dynamically switches between **send** and **microphone** modes.
-
----
-
-## 🚀 Getting Started
-
-Follow these steps to set up and run the project locally:
+## 📂 Folder & File Structure
 
 ```bash
-# Clone the repository
-git clone https://github.com/your-username/campus-smart-assistant.git
-
-# Navigate into the project directory
-cd campus-smart-assistant
-```
-
-### Run Locally
-
-* Open **`homepage.html`** → Explore the **landing page**.
-* Open **`chatbot.html`** → Interact with the **chatbot widget**.
-
-> 💡 **Tip:** For best performance, use a **modern browser** like Chrome or Edge.
-
----
-
-## 📂 Project Structure
-
-```bash
-chatbot(Debashis Branch)/
-├── Homepage(Dev)/                 # Homepage module (landing page)
-│   ├── homepage.html              # Landing page structure
-│   ├── homepage.css               # Styles & animations for homepage
-│   └── homepage.js                # Dynamic features for homepage
+campus-smart-assistant/
+├── homepage/                      # Landing page module
+│   ├── homepage.html              # Homepage structure
+│   ├── homepage.css               # Homepage styles & animations
+│   └── homepage.js                # Homepage dynamic features
 │
-├── Chatbot(Dev)/                       # Chatbot widget module
+├── chatbot/                       # Chatbot widget module
 │   ├── chatbot.html               # Chatbot UI structure
-│   ├── chatbot.css                # Chatbot styling, effects, and responsiveness
-│   ├── chatbot.js                 # Chatbot logic, messaging, voice input, multi-language support
+│   ├── chatbot.css                # Chatbot styles, effects, and responsiveness
+│   ├── chatbot.js                 # Chatbot logic, voice input, multi-language support
 │   ├── avatar.jpg                 # Bot avatar image
-│   └── voice.png                  # Voice input visualization graphic
+│   └── voice.png                  # Voice input visualization asset
 │
 └── README.md                      # Project documentation
-
+```
 
 ---
 
@@ -79,15 +27,25 @@ chatbot(Debashis Branch)/
 
 | **Technology**       | **Purpose**                                                |
 | -------------------- | ---------------------------------------------------------- |
-| **HTML5**            | Structure and semantic markup                              |
-| **CSS3**             | Styling, responsiveness, and animations                    |
-| **JavaScript (ES6)** | Core interactivity and chatbot logic            
+| **HTML5**            | Structuring pages and chatbot UI                           |
+| **CSS3**             | Styling, animations, and responsiveness                    |
+| **JavaScript (ES6)** | Dynamic interactions and chatbot logic                     |
+| **Web APIs**         | Voice recognition, speech synthesis, and scroll animations |
 
 ---
 
-## 🤝 Contributing
+## ⚡ How It Works
 
-We welcome contributions from the developer community!
+* **Homepage** → A **modern, responsive landing page** showcasing the **Campus Smart Assistant** features.
+* **Chatbot Widget** → An **interactive chatbot** that supports:
+
+  *  **Multi-language support** (English, Hindi, Bengali, Telugu, Tamil)
+  *  **Voice input** with dynamic visualizations
+  *  **Quick replies** and typing indicators for smooth interaction
+
+---
+
+## 🤝 How to Contribute
 
 1. **Fork** the repository
 2. **Create** a feature branch:
@@ -105,14 +63,12 @@ We welcome contributions from the developer community!
    ```bash
    git push origin feature/new-feature
    ```
-5. **Open a Pull Request** 🎉
-   
+5. **Open a Pull Request** ✅
+
 ---
 
 ## 📜 License
 
-This project is licensed under the **MIT License** – free to use, modify, and distribute.
+This project is licensed under the **MIT License** — you’re free to **use, modify, and distribute** it.
 
 ---
-
-
