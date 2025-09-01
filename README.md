@@ -57,17 +57,21 @@ cd campus-smart-assistant
 ## 📂 Project Structure
 
 ```bash
-campus-smart-assistant/
-├── homepage.html       # Landing page structure
-├── homepage.css        # Landing page styling & animations
-├── homepage.js         # Homepage dynamic features
+chatbot(Debashis Branch)/
+├── Homepage(Dev)/                 # Homepage module (landing page)
+│   ├── homepage.html              # Landing page structure
+│   ├── homepage.css               # Styles & animations for homepage
+│   └── homepage.js                # Dynamic features for homepage
 │
-├── chatbot.html        # Chatbot widget UI
-├── chatbot.css         # Chatbot styles & effects
-├── chatbot.js          # Chatbot logic & voice integration
+├── Chatbot(Dev)/                       # Chatbot widget module
+│   ├── chatbot.html               # Chatbot UI structure
+│   ├── chatbot.css                # Chatbot styling, effects, and responsiveness
+│   ├── chatbot.js                 # Chatbot logic, messaging, voice input, multi-language support
+│   ├── avatar.jpg                 # Bot avatar image
+│   └── voice.png                  # Voice input visualization graphic
 │
-└── assets/             # Images, icons, and media files
-```
+└── README.md                      # Project documentation
+
 
 ---
 
