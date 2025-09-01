@@ -5,13 +5,13 @@
 ## 📂 Folder & File Structure
 
 ```bash
-campus-smart-assistant/
-├── homepage/                      # Landing page module
+chatbot(Debashis Branch)/
+├── Homepage(Dev)/                      # Landing page module
 │   ├── homepage.html              # Homepage structure
 │   ├── homepage.css               # Homepage styles & animations
 │   └── homepage.js                # Homepage dynamic features
 │
-├── chatbot/                       # Chatbot widget module
+├── Chatbot(Dev)/                       # Chatbot widget module
 │   ├── chatbot.html               # Chatbot UI structure
 │   ├── chatbot.css                # Chatbot styles, effects, and responsiveness
 │   ├── chatbot.js                 # Chatbot logic, voice input, multi-language support
