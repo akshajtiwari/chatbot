@@ -112,5 +112,3 @@ This project is licensed under the **MIT License** – free to use, modify, and 
 ---
 
 
-*"An intelligent campus assistant for seamless communication and instant support"*
-to make it sound more SIH-ready? It can give your README a strong first impression. Should I?
