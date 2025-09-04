@@ -1,3 +1,4 @@
+/* --- General Body and Container --- */
 body {
     font-family: 'Inter', sans-serif;
     background-color: #f4f7f6;
@@ -12,16 +13,16 @@ body {
 
 .container {
     width: 100%;
-    max-width: 700px;
+    max-width: 800px;
     background-color: #ffffff;
-    padding: 2rem 3rem;
+    padding: 1rem 2rem 2rem 2rem;
     border-radius: 12px;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
 }
 
 header {
     text-align: center;
-    margin-bottom: 2.5rem;
+    margin-bottom: 2rem;
     border-bottom: 1px solid #e0e0e0;
     padding-bottom: 1.5rem;
 }
@@ -43,12 +44,36 @@ h2 {
     font-size: 1.25rem;
     font-weight: 600;
     color: #34495e;
-    margin-top: 2rem;
+    margin-top: 0;
     margin-bottom: 1.5rem;
-    border-bottom: 1px solid #eee;
     padding-bottom: 0.75rem;
 }
 
+h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #34495e;
+    margin-top: 2rem;
+}
+
+hr {
+    border: none;
+    border-top: 1px solid #eee;
+    margin: 2rem 0;
+}
+
+
+/* --- Card Layout --- */
+.card {
+    background-color: #ffffff;
+    padding: 2rem;
+    border-radius: 12px;
+    border: 1px solid #e9ecef;
+    margin-bottom: 2rem;
+}
+
+
+/* --- Form Elements --- */
 .form-group {
     margin-bottom: 1.5rem;
 }
@@ -84,45 +109,140 @@ textarea {
     min-height: 80px;
 }
 
-.submit-btn {
-    display: block;
-    width: 100%;
-    padding: 1rem;
-    background-color: #3498db;
-    color: white;
-    border: none;
+/* --- Configuration Loader --- */
+.config-loader {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    align-items: center;
+}
+#config-select {
+    flex-grow: 1;
+    padding: 0.75rem;
+    border: 1px solid #ccc;
     border-radius: 8px;
-    font-size: 1.1rem;
-    font-weight: 600;
+    font-size: 1rem;
+    background-color: #fff;
+}
+
+/* --- Button Styles --- */
+.btn-secondary {
+    padding: 0.75rem 1.5rem;
+    background-color: #6c757d;
+    color: white;
+    border: 1px solid #6c757d;
+    border-radius: 8px;
     cursor: pointer;
-    transition: background-color 0.3s;
+    font-weight: 500;
+    transition: background-color 0.2s;
+}
+.btn-secondary:hover {
+    background-color: #5a6268;
+}
+
+.config-actions {
+    display: flex;
+    gap: 1rem;
     margin-top: 2rem;
 }
 
-.submit-btn:hover {
-    background-color: #2980b9;
+.btn-primary {
+    padding: 1rem;
+    background-color: #28a745; /* Green for save */
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    flex-grow: 1;
+    transition: background-color 0.2s;
+}
+.btn-primary:hover {
+    background-color: #218838;
 }
 
+.btn-action {
+    padding: 1rem;
+    background-color: #007bff; /* Blue for action */
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    flex-grow: 1;
+    transition: background-color 0.2s;
+}
+.btn-action:hover {
+    background-color: #0069d9;
+}
+
+
+/* --- Data Management Table --- */
+.table-container {
+    margin-top: 1.5rem;
+    max-height: 400px;
+    overflow-y: auto;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+}
+#documents-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+#documents-table th, #documents-table td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+#documents-table th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+    position: sticky;
+    top: 0;
+}
+#documents-table tbody tr:hover {
+    background-color: #f1f1f1;
+}
+
+.delete-btn {
+    color: #dc3545; /* Red for delete */
+    cursor: pointer;
+    background: none;
+    border: none;
+    font-weight: bold;
+    padding: 5px;
+}
+.delete-btn:hover {
+    text-decoration: underline;
+}
+
+/* --- Response Message --- */
 #response-message {
     margin-top: 1.5rem;
     padding: 1rem;
     border-radius: 8px;
     text-align: center;
     font-weight: 500;
+    display: none; /* Hidden by default */
 }
 
-.message-success {
+#response-message.message-success {
     background-color: #e8f5e9;
     color: #2e7d32;
+    display: block;
 }
 
-.message-error {
+#response-message.message-error {
     background-color: #ffebee;
     color: #c62828;
+    display: block;
 }
 
-.message-info {
+#response-message.message-info {
     background-color: #e3f2fd;
     color: #1565c0;
+    display: block;
 }
 
