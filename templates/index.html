@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data pipeline Admin Control Panel</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Data Pipeline Control Panel</h1>
+            <p>Configure and launch the ERP Search from here.</p>
+        </header>
+
+        <form id="scraper-form">
+            <h2>ERP Configuration</h2>
+            
+            <div class="form-group">
+                <label for="login_url">Login URL (Form Action)</label>
+                <input type="text" id="login_url" name="login_url" placeholder="e.g., https://erp.college.edu/Auth" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="username_payload_key">Username Payload Key</label>
+                <input type="text" id="username_payload_key" name="username_payload_key" placeholder="e.g., username" required>
+            </div>
+
+            <div class="form-group">
+                <label for="password_payload_key">Password Payload Key</label>
+                <input type="text" id="password_payload_key" name="password_payload_key" placeholder="e.g., password" required>
+            </div>
+
+            <div class="form-group">
+                <label for="target_urls">Target URLs to Search (one per line)</label>
+                <textarea id="target_urls" name="target_urls" rows="4" placeholder="e.g., https://erp.college.edu/Student/Notices" required></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="supported_file_types">File Types to Download (one per line)</label>
+                <textarea id="supported_file_types" name="supported_file_types" rows="3" placeholder=".pdf&#10;.docx&#10;.jpg" required></textarea>
+            </div>
+
+            <h2>ERP Credentials</h2>
+            <div class="form-group">
+                <label for="username">ERP Username</label>
+                <input type="text" id="username" name="username" required>
+            </div>
+            <div class="form-group">
+                <label for="password">ERP Password</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            
+            <button type="submit" class="submit-btn">Start Collecting</button>
+        </form>
+        <div id="response-message"></div>
+    </div>
+    <script>
+        document.getElementById('scraper-form').addEventListener('submit', async function(event) {
+            event.preventDefault();
+            const form = event.target;
+            const formData = new FormData(form);
+            const responseMessage = document.getElementById('response-message');
+            
+            responseMessage.textContent = 'Starting Search...';
+            responseMessage.className = 'message-info';
+
+            try {
+                const response = await fetch('/start_scraping', {
+                    method: 'POST',
+                    body: formData
+                });
+                const result = await response.json();
+                if (response.ok) {
+                    responseMessage.textContent = result.message;
+                    responseMessage.className = 'message-success';
+                } else {
+                    responseMessage.textContent = 'Error: ' + (result.message || 'Unknown error');
+                    responseMessage.className = 'message-error';
+                }
+            } catch (error) {
+                responseMessage.textContent = 'Network or server error occurred.';
+                responseMessage.className = 'message-error';
+            }
+        });
+    </script>
+</body>
+</html>
+
