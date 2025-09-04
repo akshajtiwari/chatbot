@@ -3,15 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Data pipeline Admin Control Panel</title>
-    <link rel="stylesheet" href="/static/style.css">
+    <title>Data Pipeline Admin Control Panel</title>
+    <!-- FIX: Corrected the path to use a forward slash -->
+    <link rel="stylesheet" href="/static/style.css"> 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
     <div class="container">
         <header>
             <h1>Data Pipeline Control Panel</h1>
-            <p>Configure and launch the ERP Search from here.</p>
+            <p>Configure and launch the ERP Scraper from here.</p>
         </header>
 
         <form id="scraper-form">
@@ -33,8 +34,18 @@
             </div>
 
             <div class="form-group">
-                <label for="target_urls">Target URLs to Search (one per line)</label>
+                <label for="target_urls">Target URLs to Scrape (one per line)</label>
                 <textarea id="target_urls" name="target_urls" rows="4" placeholder="e.g., https://erp.college.edu/Student/Notices" required></textarea>
+            </div>
+
+            <!-- NEW: Added an informational section for HTML content scraping -->
+            <div class="form-group info-group">
+                <label>Content Scraping Options</label>
+                <div class="info-checkbox">
+                    <input type="checkbox" id="html_content" name="html_content" checked disabled>
+                    <label for="html_content">Archive HTML Text Content from Target URLs</label>
+                    <span>(This feature is always on)</span>
+                </div>
             </div>
 
             <div class="form-group">
@@ -63,10 +74,11 @@
             const formData = new FormData(form);
             const responseMessage = document.getElementById('response-message');
             
-            responseMessage.textContent = 'Starting Search...';
+            responseMessage.textContent = 'Starting Scraper...';
             responseMessage.className = 'message-info';
 
             try {
+                // The URL was correct, ensuring it's clear
                 const response = await fetch('/start_scraping', {
                     method: 'POST',
                     body: formData

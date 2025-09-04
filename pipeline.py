@@ -28,9 +28,14 @@ config_collection = db['configurations']
 def calculate_checksum(file_path):
     """Calculates the SHA-256 hash of a file for deduplication."""
     sha256_hash=hashlib.sha256()
-    with open(file_path, 'rb') as f:
-        for byte_block in iter(lambda: f.read(4096), b""):
-            sha256_hash.update(byte_block)
+    if isinstance(file_path,str) and os.path.exists(file_path):
+        with open(file_path, 'rb') as f:
+            for byte_block in iter(lambda: f.read(4096), b""):
+                sha256_hash.update(byte_block)
+    elif isinstance(file_path,bytes):
+        sha256_hash.update(file_path)
+    else:
+        return None
     return sha256_hash.hexdigest()
 
 ## --- Configuration Management --- 
@@ -129,6 +134,23 @@ def scrape_erp_portal(config, username, password):
                 print(f"\n---Reading Page:{target_url}")
                 protected_page_res = session.get(target_url)
                 protected_page_res.raise_for_status()
+
+
+                page_content_bytes = protected_page_res.content
+                html_checksum = calculate_checksum(page_content_bytes)
+                
+                if html_checksum and not document_collection.find_one({'checksum':html_checksum}):
+                    print(" -> New HTML content  detected on page. Archiving...")
+                    document_collection.insert_one({
+                        'source_url':target_url,
+                        'download_timestamp':time.time(),
+                        'checksum':html_checksum,
+                        'status':'staged',
+                        'file_type':'html_content',
+                        'raw_html':page_content_bytes.decode('utf-8',errors='ignore')
+                    })
+                else:
+                    print(" -> HTML content is unchanged since last checked.")
 
                 print(f"Searching for file types: {', '.join(config['supported_file_types'])}")
                 soup = BeautifulSoup(protected_page_res.content,'html.parser')
