@@ -98,40 +98,66 @@
         }
 
         function sendMessage() {
-            const input = document.getElementById('messageInput');
-            const message = input.value.trim();
-            
-            if (message) {
-                const userMessage = {
-                    id: Date.now(),
-                    text: message,
-                    sender: 'user',
-                    timestamp: new Date().toLocaleTimeString()
-                };
-                
-                messages.push(userMessage);
-                input.value = '';
-                handleInputChange();
-                renderMessages();
-                removeQuickSuggestions();
-                
-                
-                showTypingIndicator();
-                
-                
-                setTimeout(() => {
-                    hideTypingIndicator();
-                    const botResponse = {
-                        id: Date.now() + 1,
-                        text: "Thank you for your question! I'm here to help you with all your college-related queries. Let me find the most accurate information for you.",
-                        sender: 'bot',
-                        timestamp: new Date().toLocaleTimeString()
-                    };
-                    messages.push(botResponse);
-                    renderMessages();
-                }, 1500);
-            }
+    const input = document.getElementById('messageInput');
+    const message = input.value.trim();
+
+    if (!message) return;
+
+    const userMessage = {
+        id: Date.now(),
+        text: message,
+        sender: 'user',
+        timestamp: new Date().toLocaleTimeString()
+    };
+    messages.push(userMessage);
+    input.value = '';
+    handleInputChange();
+    renderMessages();
+    removeQuickSuggestions();
+
+    showTypingIndicator();
+
+    // Use 127.0.0.1:5000 (same machine) — helps with some local CORS/hosts issues
+    fetch('http://127.0.0.1:5000/chat/text', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            message: message,
+            language: currentLanguage
+        })
+    })
+    .then(async res => {
+        if (!res.ok) {
+            const txt = await res.text().catch(()=> 'No body');
+            throw new Error(`HTTP ${res.status}: ${txt}`);
         }
+        return res.json();
+    })
+    .then(data => {
+        hideTypingIndicator();
+        const botResponse = {
+            id: Date.now() + 1,
+            text: data.response_text || "⚠️ No response from backend",
+            sender: 'bot',
+            timestamp: new Date().toLocaleTimeString()
+        };
+        messages.push(botResponse);
+        renderMessages();
+    })
+    .catch(err => {
+        console.error("Error connecting to backend:", err);
+        hideTypingIndicator();
+        const botResponse = {
+            id: Date.now() + 1,
+            text: "❌ Error connecting to server.",
+            sender: 'bot',
+            timestamp: new Date().toLocaleTimeString()
+        };
+        messages.push(botResponse);
+        renderMessages();
+    });
+}
+
 
         let recordingStartTime = 0;
         let recordingTimer = null;
@@ -350,14 +376,18 @@
         }
 
         function updateFooter() {
-            document.getElementById('footerText').textContent = 'Powered by AI • ' + languages[currentLanguage].name;
-        }
+    const footerEl = document.getElementById('footerText');
+    if (!footerEl) return; // guard — do nothing if element not present
+    footerEl.textContent = 'Powered by AI • ' + (languages[currentLanguage]?.name || 'Unknown');
+}
 
-      
-        window.onload = function() {
-            updateFooter();
-            setTimeout(function() {
-                document.getElementById('chatBubble').style.display = 'block';
-            }, 1000);
-        };
+// Ensure DOM is ready
+document.addEventListener('DOMContentLoaded', function() {
+    updateFooter();
+    setTimeout(function() {
+        const chatBubble = document.getElementById('chatBubble');
+        if (chatBubble) chatBubble.style.display = 'block';
+    }, 1000);
+});
+
    
