@@ -9,6 +9,48 @@ from pymongo import MongoClient
 import getpass
 import re
 
+# ----- Configuration for PDF Processor -----
+PDF_PROCESSOR_URL = "http://127.0.0.1:8000/process-pdf-advanced/"
+
+def send_file_to_processor(file_path,collection):
+    """Sends a downloaded PDF to the processor and updates its status in MongoDB."""
+    if not os.path.exists(file_path):
+        print(f"[Processor Link] -> ERROR: File not found at {file_path}")
+        return
+    
+    filename = os.path.basename(file_path)
+    print(f"[Processor Link] -> Sending {filename} to the processing service ... ")
+    
+    try:
+        with open(file_path,'rb') as f:
+            # The key 'file' must match the parameter name in the pdf_processor endpoint
+            files = {'file': (filename, f, 'application/pdf')}
+            response = requests.post(PDF_PROCESSOR_URL, files=files,timeout=300) # 5 min timeout for large files
+
+            # Check the response from the processor service
+            if response.status_code == 201: # 201 Created is the success code you set
+                print(f"[Processor Link] -> SUCCESS: '{filename}' was processed and stored.")
+                # Updating the document's status to 'processed'
+                collection.update_one(
+                    {'file_name':filename},
+                    {'$set':{'status':"processed"}}
+                )
+            else:
+                print(f"[Processor Link] -> FAILED: Processor returned status {response.status_code}.")
+            print(f"                   Response: {response.text}")
+            # Update the document's status to reflect the error
+            collection.update_one(
+                {'file_name': filename},
+                {'$set': {'status': 'processing_failed'}}
+            )
+
+    except requests.exceptions.RequestException as e:
+        print(f"[Processor Link] -> ERROR: Could not connect to the PDF Processor: {e}")
+        collection.update_one(
+            {'file_name': filename},
+            {'$set': {'status': 'processing_failed'}}
+        )
+
 # --- LoginError -----
 
 class LoginError(Exception):
@@ -118,6 +160,9 @@ def search_erp_portal(config, username, password, stop_event,condition, poll_int
                                         'download_timestamp':time.time(),'checksum':file_checksum,
                                         'status':'staged','file_type':ftype,'erp_name':config['erp_name']
                                     })
+                                # If the downloaded file is a PDF, send it for processing.
+                                if ftype.lower() == '.pdf':
+                                    send_file_to_processor(file_path,document_collection)
                             break
 
             if not stop_event.is_set():
