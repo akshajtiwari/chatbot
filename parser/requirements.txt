@@ -7,3 +7,4 @@ pikepdf
 pytesseract
 pandas
 ctransformers
+pdf_processor
