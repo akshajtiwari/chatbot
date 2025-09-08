@@ -1,0 +1,9 @@
+fastapi
+uvicorn[standard]
+python-multipart
+pymongo
+unstructured[local-inference]
+pikepdf
+pytesseract
+pandas
+ctransformers
