@@ -178,6 +178,41 @@ textarea {
     background-color: #0069d9;
 }
 
+.btn-danger {
+    padding: 1rem;
+    background-color: #dc3545; /* Red for stop/delete */
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    flex-grow: 1;
+    transition: background-color 0.2s;
+}
+.btn-danger:hover {
+    background-color: #c82333;
+}
+
+/* Style for disabled buttons */
+button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+}
+button:disabled:hover {
+    background-color: #cccccc;
+}
+
+.manual-trigger {
+    margin-top: 1rem;
+}
+
+#searcher-status-indicator {
+    font-size: 0.9rem;
+    font-weight: 500;
+    margin-left: 0.5rem;
+}
+
 
 /* --- Data Management Table --- */
 .table-container {
