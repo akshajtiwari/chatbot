@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 """
-Intelligent PDF Parser with Text Chunking, Keyword-Based Filenaming, and Text Summarization
+Intelligent PDF Parser with Semantic Text Chunking, Keyword-Based Filenaming, and Text Summarization
 - Complete implementation with text extraction and summarization
-- Breaks text into structured chunks for better processing
+- Breaks text into semantic chunks for better processing
 - Uses keywords to generate descriptive filenames
 - Enhanced search capabilities through keyword tagging
+- Summarizes extracted text using BART model
 - Summarizes extracted text using BART model
 """
 
@@ -18,6 +19,7 @@ import os
 import time
 import gc
 import traceback
+import ssl
 from typing import Dict, Any, List, Optional, Tuple
 from datetime import datetime
 import pandas as pd
@@ -25,11 +27,49 @@ from PIL import Image
 
 import torch
 from transformers import DonutProcessor, VisionEncoderDecoderModel, TableTransformerForObjectDetection, pipeline
+from transformers import DonutProcessor, VisionEncoderDecoderModel, TableTransformerForObjectDetection, pipeline
 from torchvision import transforms
 from pdf2image import convert_from_bytes
 import pytesseract
 from tqdm import tqdm
 import pdfplumber
+import numpy as np
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
+from sentence_transformers import SentenceTransformer
+import nltk
+
+# Fix SSL issues for NLTK download
+try:
+    _create_unverified_https_context = ssl._create_unverified_context
+except AttributeError:
+    pass
+else:
+    ssl._create_default_https_context = _create_unverified_https_context
+
+# Download required NLTK data
+try:
+    nltk.data.find('tokenizers/punkt_tab')
+except LookupError:
+    print("Downloading NLTK punkt_tab data...")
+    nltk.download('punkt_tab', quiet=True)
+
+try:
+    nltk.data.find('tokenizers/punkt')
+except LookupError:
+    print("Downloading NLTK punkt data...")
+    nltk.download('punkt', quiet=True)
+
+try:
+    nltk.data.find('corpora/stopwords')
+except LookupError:
+    print("Downloading NLTK stopwords data...")
+    nltk.download('stopwords', quiet=True)
+
+from nltk.tokenize import sent_tokenize, word_tokenize
+from nltk.corpus import stopwords
+
+
 
 # Set up logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -45,6 +85,7 @@ class Config:
     DPI = 200
     MAX_RETRIES = 3
     CHUNK_SIZE = 1000  # Approximate words per chunk
+    SEMANTIC_CHUNK_SIZE = 5  # Number of sentences per semantic chunk
     KEYWORDS = [ "examination", "exam schedule", "timetable", "results", "postponement",
     "registration", "semester registration", "course registration", "backlog", "carry over",
     "classes", "class timetable", "suspension of classes", "extra classes", "remedial",
@@ -61,8 +102,8 @@ class Config:
     "seminar", "guest lecture", "webinar",
     "competition", "coding competition", "debate", "sports",
     "fest", "annual fest", "tech fest", "cultural fest",
-    "celebration", "foundation day", "annual day", "freshers", "farewell"
-, "placement", "placement drive", "campus recruitment", "pool campus", "job opening",
+    "celebration", "foundation day", "annual day", "freshers", "farewell",
+    "placement", "placement drive", "campus recruitment", "pool campus", "job opening",
     "internship", "internship opportunity", "summer internship",
     "hostel", "hostel allotment", "mess menu", "hostel rules",
     "library", "library timings", "book return",
@@ -71,6 +112,7 @@ class Config:
     SUMMARIZATION_MODEL = "facebook/bart-large-cnn"
     SUMMARY_MAX_LENGTH = 60
     SUMMARY_MIN_LENGTH = 20
+    SIMILARITY_THRESHOLD = 0.85  # Threshold for text similarity to avoid duplicates
 
 class IntelligentPDFParser:
     def __init__(self, config=None):
@@ -86,6 +128,7 @@ class IntelligentPDFParser:
         self.table_model = None
         self.table_processor = None
         self.summarizer = None
+        self.sentence_model = None
         
         self.SCRIPT_TO_LANG_CODE = {
             'Latin': 'eng', 'Devanagari': 'hin', 'Cyrillic': 'rus', 
@@ -97,6 +140,11 @@ class IntelligentPDFParser:
         self.header_keyword_sets = [
             {"pranveer", "singh", "institute", "technology"},
             {"kanpur", "delhi", "national", "highway"},
+            {"ph", "tollfree", "email", "info@psit.ac.in",'notice'},
+            {"psit", "college", "code", "campus", "highway", "kanpur"},
+            {"recognized", "ugc", "act", "approved", "aicte", "technical", "university"},
+            {"director", "principal", "prof", "dr", "dean"},
+            {"page", "date", "ref", "reference", "copy", "to"},
             {"ph", "tollfree", "email", "info@psit.ac.in",'notice'},
             {"psit", "college", "code", "campus", "highway", "kanpur"},
             {"recognized", "ugc", "act", "approved", "aicte", "technical", "university"},
@@ -138,6 +186,30 @@ class IntelligentPDFParser:
         except Exception as e:
             logger.warning(f"Failed to get GPU memory info: {e}")
             return 0.0
+
+    def load_sentence_model(self):
+        """Load sentence transformer model for semantic analysis"""
+        if self.sentence_model is None:
+            logger.info("Loading sentence transformer model...")
+            try:
+                self.sentence_model = SentenceTransformer('all-MiniLM-L6-v2')
+                logger.info("Sentence transformer model loaded successfully")
+            except Exception as e:
+                logger.error(f"Failed to load sentence model: {str(e)}")
+                raise
+
+    def unload_sentence_model(self):
+        """Unload sentence model to free memory"""
+        if self.sentence_model is not None:
+            try:
+                del self.sentence_model
+                self.sentence_model = None
+                if self.use_gpu:
+                    torch.cuda.empty_cache()
+                gc.collect()
+                logger.info("Sentence model unloaded")
+            except Exception as e:
+                logger.warning(f"Error unloading sentence model: {e}")
 
     def load_donut_model(self):
         """Load the Donut model (if needed in the future)"""
@@ -203,6 +275,30 @@ class IntelligentPDFParser:
                 logger.info("Table Transformer model unloaded")
             except Exception as e:
                 logger.warning(f"Error unloading table model: {e}")
+
+    def load_summarizer(self):
+        """Load the summarization model"""
+        if self.summarizer is None:
+            logger.info(f"Loading summarization model '{self.config.SUMMARIZATION_MODEL}'...")
+            try:
+                self.summarizer = pipeline("summarization", model=self.config.SUMMARIZATION_MODEL)
+                logger.info("Summarization model loaded successfully")
+            except Exception as e:
+                logger.error(f"Failed to load summarization model: {str(e)}")
+                raise
+
+    def unload_summarizer(self):
+        """Unload summarization model to free memory"""
+        if self.summarizer is not None:
+            try:
+                del self.summarizer
+                self.summarizer = None
+                if self.use_gpu:
+                    torch.cuda.empty_cache()
+                gc.collect()
+                logger.info("Summarization model unloaded")
+            except Exception as e:
+                logger.warning(f"Error unloading summarization model: {e}")
 
     def load_summarizer(self):
         """Load the summarization model"""
@@ -307,37 +403,113 @@ class IntelligentPDFParser:
         
         return '\n'.join(filtered_lines)
 
-    def chunk_text(self, text: str, chunk_size: int = None) -> List[Dict[str, Any]]:
+    def remove_similar_text(self, text: str) -> str:
         """
-        Break text into manageable chunks with metadata
-        Returns list of chunks with word count and potential keywords
+        Remove similar or duplicate text segments to improve readability
         """
-        if chunk_size is None:
-            chunk_size = self.config.CHUNK_SIZE
+        sentences = sent_tokenize(text)
+        if len(sentences) <= 1:
+            return text
             
+        # Load sentence model for similarity comparison
+        self.load_sentence_model()
+        
+        # Calculate sentence embeddings
+        embeddings = self.sentence_model.encode(sentences)
+        
+        # Find similar sentences
+        unique_sentences = []
+        seen_indices = set()
+        
+        for i in range(len(sentences)):
+            if i in seen_indices:
+                continue
+                
+            unique_sentences.append(sentences[i])
+            
+            # Compare with other sentences
+            for j in range(i+1, len(sentences)):
+                if j in seen_indices:
+                    continue
+                    
+                similarity = cosine_similarity(
+                    embeddings[i].reshape(1, -1), 
+                    embeddings[j].reshape(1, -1)
+                )[0][0]
+                
+                if similarity > self.config.SIMILARITY_THRESHOLD:
+                    seen_indices.add(j)
+        
+        return ' '.join(unique_sentences)
+
+    def semantic_chunk_text(self, text: str) -> List[Dict[str, Any]]:
+        """
+        Break text into semantic chunks based on content similarity
+        Returns list of chunks with metadata but without the full text
+        """
+        if not text or len(text.strip()) == 0:
+            return []
+            
+        # Split text into sentences
+        sentences = sent_tokenize(text)
+        if len(sentences) == 0:
+            return []
+            
+        # Load sentence model for semantic analysis
+        self.load_sentence_model()
+        
+        # Calculate sentence embeddings
+        embeddings = self.sentence_model.encode(sentences)
+        
         chunks = []
-        words = text.split()
+        current_chunk = []
+        current_embedding = None
         
-        # If text is small enough, return as single chunk
-        if len(words) <= chunk_size:
-            return [{
-                "text": text,
-                "word_count": len(words),
-                "char_count": len(text),
-                "keywords": self.extract_keywords(text)
-            }]
-        
-        # Split into chunks
-        for i in range(0, len(words), chunk_size):
-            chunk_words = words[i:i + chunk_size]
-            chunk_text = " ".join(chunk_words)
+        for i, sentence in enumerate(sentences):
+            sentence_embedding = embeddings[i]
             
+            if not current_chunk:
+                # Start a new chunk
+                current_chunk.append(sentence)
+                current_embedding = sentence_embedding
+            else:
+                # Calculate similarity with current chunk
+                similarity = cosine_similarity(
+                    current_embedding.reshape(1, -1), 
+                    sentence_embedding.reshape(1, -1)
+                )[0][0]
+                
+                if (similarity > 0.7 and len(current_chunk) < self.config.SEMANTIC_CHUNK_SIZE) or len(current_chunk) < 2:
+                    # Add to current chunk
+                    current_chunk.append(sentence)
+                    # Update chunk embedding (weighted average)
+                    current_embedding = (current_embedding * len(current_chunk) + sentence_embedding) / (len(current_chunk) + 1)
+                else:
+                    # Finalize current chunk
+                    chunk_text = ' '.join(current_chunk)
+                    chunks.append({
+                        "word_count": len(word_tokenize(chunk_text)),
+                        "char_count": len(chunk_text),
+                        "sentence_count": len(current_chunk),
+                        "keywords": self.extract_keywords(chunk_text),
+                        "start_sentence": i - len(current_chunk) + 1,
+                        "end_sentence": i
+                    })
+                    
+                    # Start new chunk
+                    current_chunk = [sentence]
+                    current_embedding = sentence_embedding
+        
+        # Add the last chunk
+        if current_chunk:
+            chunk_text = ' '.join(current_chunk)
             chunks.append({
-                "text": chunk_text,
-                "word_count": len(chunk_words),
+                "word_count": len(word_tokenize(chunk_text)),
                 "char_count": len(chunk_text),
+                "sentence_count": len(current_chunk),
                 "keywords": self.extract_keywords(chunk_text),
-                "chunk_id": f"chunk_{len(chunks)+1}"
+                "start_sentence": len(sentences) - len(current_chunk),
+                "end_sentence": len(sentences) - 1
             })
         
         return chunks
@@ -439,10 +611,11 @@ class IntelligentPDFParser:
 
     def extract_text_and_tables_from_native_pdf(self, pdf_content: bytes) -> Dict[str, Any]:
         """Extract text and tables from text-based PDF with header cleaning."""
+        """Extract text and tables from text-based PDF with header cleaning."""
         logger.info("Extracting text and tables from text-based PDF...")
         full_text_parts, all_tables = [], []
         
-        # --- NEW: Helper function to fix duplicate headers ---
+        # Helper function to fix duplicate headers
         def sanitize_headers(headers: List[str]) -> List[str]:
             if not headers:
                 return []
@@ -458,7 +631,6 @@ class IntelligentPDFParser:
                     counts[clean_header] = 0
                     new_headers.append(clean_header)
             return new_headers
-        # --- End of new function ---
 
         try:
             with pdfplumber.open(io.BytesIO(pdf_content)) as pdf:
@@ -471,15 +643,15 @@ class IntelligentPDFParser:
                         page = pdf.pages[i]
                         
                         # Extract tables with header sanitization
+                        # Extract tables with header sanitization
                         tables = page.extract_tables()
                         if tables:
                             for idx, table_data in enumerate(tables):
                                 if table_data and len(table_data) > 1:
                                     try:
-                                        # --- MODIFIED: Sanitize headers before creating DataFrame ---
+                                        # Sanitize headers before creating DataFrame
                                         headers = sanitize_headers(table_data[0])
                                         df = pd.DataFrame(table_data[1:], columns=headers)
-                                        # --- End of modification ---
                                         all_tables.append({
                                             "page": i + 1, 
                                             "table_index": idx, 
@@ -501,12 +673,14 @@ class IntelligentPDFParser:
                         if plain_text:
                             # Filter out institutional text
                             filtered_text = self.filter_institutional_text(plain_text)
+                            # Remove similar text to improve readability
+                            clean_text = self.remove_similar_text(filtered_text)
                             page_texts.append({
                                 "page_number": i + 1,
-                                "text": filtered_text,
-                                "word_count": len(filtered_text.split())
+                                "text": clean_text,
+                                "word_count": len(clean_text.split())
                             })
-                            full_text_parts.append(filtered_text)
+                            full_text_parts.append(clean_text)
                     except Exception as e:
                         logger.warning(f"Error processing page {i+1}: {e}")
                         continue
@@ -517,8 +691,8 @@ class IntelligentPDFParser:
             
         full_text = "\n\n".join(full_text_parts).strip()
         
-        # Chunk the text for better processing
-        text_chunks = self.chunk_text(full_text)
+        # Create semantic chunks for better processing
+        text_chunks = self.semantic_chunk_text(full_text)
         
         return {
             "full_text": full_text,
@@ -552,7 +726,9 @@ class IntelligentPDFParser:
                     # Extract text and filter institutional content
                     page_text = pytesseract.image_to_string(image, lang='eng')
                     filtered_text = self.filter_institutional_text(page_text)
-                    full_text_parts.append(filtered_text)
+                    # Remove similar text to improve readability
+                    clean_text = self.remove_similar_text(filtered_text)
+                    full_text_parts.append(clean_text)
                 except Exception as e:
                     logger.warning(f"OCR failed for page {page_num}: {e}")
                     full_text_parts.append("")
@@ -600,7 +776,7 @@ class IntelligentPDFParser:
                     logger.warning(f"Table detection failed on page {page_num}: {e}")
                     
             full_text = "\n".join(full_text_parts)
-            text_chunks = self.chunk_text(full_text)
+            text_chunks = self.semantic_chunk_text(full_text)
             
             return {
                 "tables": all_tables, 
@@ -639,11 +815,13 @@ class IntelligentPDFParser:
                     page_text = pytesseract.image_to_string(img, lang=lang)
                     # Filter institutional text
                     filtered_text = self.filter_institutional_text(page_text)
-                    full_text_parts.append(filtered_text)
+                    # Remove similar text to improve readability
+                    clean_text = self.remove_similar_text(filtered_text)
+                    full_text_parts.append(clean_text)
                     page_texts.append({
                         "page_number": page_num,
-                        "text": filtered_text,
-                        "word_count": len(filtered_text.split())
+                        "text": clean_text,
+                        "word_count": len(clean_text.split())
                     })
                 except Exception as e:
                     logger.warning(f"OCR failed for page {page_num}: {e}")
@@ -655,7 +833,7 @@ class IntelligentPDFParser:
                     full_text_parts.append("")
                     
             full_text = "\n".join(full_text_parts)
-            text_chunks = self.chunk_text(full_text)
+            text_chunks = self.semantic_chunk_text(full_text)
             
             return {
                 "full_text": full_text,
@@ -721,8 +899,31 @@ class IntelligentPDFParser:
         finally:
             self.unload_summarizer()
 
+    def summarize_text(self, text: str) -> str:
+        """
+        Summarize text using the BART model
+        """
+        if not text or len(text.split()) < 10:  # Minimum words for summarization
+            return text
+            
+        try:
+            self.load_summarizer()
+            summary = self.summarizer(
+                text, 
+                max_length=self.config.SUMMARY_MAX_LENGTH, 
+                min_length=self.config.SUMMARY_MIN_LENGTH, 
+                do_sample=False
+            )
+            return summary[0]['summary_text']
+        except Exception as e:
+            logger.error(f"Text summarization failed: {e}")
+            return text  # Return original text if summarization fails
+        finally:
+            self.unload_summarizer()
+
     def parse_pdf(self, pdf_url: str) -> Dict[str, Any]:
         """
+        Main method to parse PDF from URL with enhanced text chunking and summarization
         Main method to parse PDF from URL with enhanced text chunking and summarization
         """
         pdf_content = None
@@ -784,11 +985,19 @@ class IntelligentPDFParser:
             # Summarize the full text
             summarized_text = self.summarize_text(full_text)
             
-            # Summarize each chunk
+            # Summarize each chunk (using the full text and chunk pointers)
             summarized_chunks = []
-            for chunk in extraction_data.get("text_chunks", []):
+            text_chunks = extraction_data.get("text_chunks", [])
+            sentences = sent_tokenize(full_text) if full_text else []
+            
+            for chunk in text_chunks:
+                # Reconstruct chunk text from sentences using pointers
+                chunk_text = ' '.join(sentences[chunk["start_sentence"]:chunk["end_sentence"]+1]) if sentences else ""
                 summarized_chunk = chunk.copy()
-                summarized_chunk["summary"] = self.summarize_text(chunk["text"])
+                summarized_chunk["summary"] = self.summarize_text(chunk_text)
+                # Remove the text to save space (we can reconstruct it from pointers)
+                if "text" in summarized_chunk:
+                    del summarized_chunk["text"]
                 summarized_chunks.append(summarized_chunk)
             
             # Build final result with chunked text and summaries
@@ -801,11 +1010,13 @@ class IntelligentPDFParser:
                     "page_count": page_count,
                     "chunk_count": len(extraction_data.get("text_chunks", [])),
                     "suggested_filename": filename,
+                    "full_summary": summarized_text,
+                    "suggested_filename": filename,
                     "full_summary": summarized_text
                 },
                 "content": {
-                    "full_text": full_text,
-                    "text_chunks": summarized_chunks,
+                    "full_text": full_text,  # Keep full text for reference
+                    "text_chunks": summarized_chunks,  # Chunks with metadata but no text
                     "page_texts": extraction_data.get("page_texts", []),
                     "tables": extraction_data.get("tables", [])
                 },
@@ -839,8 +1050,10 @@ class IntelligentPDFParser:
             self.unload_table_model()
             self.unload_donut_model()
             self.unload_summarizer()
+            self.unload_sentence_model()
 
 def main():
+    parser = argparse.ArgumentParser(description="Intelligent PDF Parser with Text Chunking, Keyword-Based Filenaming, and Summarization")
     parser = argparse.ArgumentParser(description="Intelligent PDF Parser with Text Chunking, Keyword-Based Filenaming, and Summarization")
     parser.add_argument("pdf_url", help="URL of the PDF to parse")
     parser.add_argument("--output_dir", "-o", help="Directory to save the output JSON file", default=None)
@@ -881,9 +1094,11 @@ def main():
             subject = result.get("document_summary", {}).get("subject", "Untitled Document")
             keywords = result.get("document_summary", {}).get("keywords", [])
             summary = result.get("document_summary", {}).get("full_summary", "")
+            summary = result.get("document_summary", {}).get("full_summary", "")
             
             print(f"✓ Successfully parsed: '{subject}'")
             print(f"✓ Keywords detected: {', '.join(keywords) if keywords else 'None'}")
+            print(f"✓ Summary: {summary}")
             print(f"✓ Summary: {summary}")
             print(f"✓ Results saved to: {output_path}")
             print(f"✓ Pages: {result['document_summary']['page_count']}, "
